@@ -1,77 +1,148 @@
 import React, { Component } from 'react';
-import Header from './components/Header'
-import Footer from './components/Footer'
-import SearchBox from './components/SearchBox'
-import ContactForm from './components/ContactForm'
+
+import axios from 'axios';
+
+import Header from './components/Header';
+import Footer from './components/Footer';
+import SearchBox from './components/SearchBox';
+import ContactForm from './components/ContactForm';
+import ContactList from './components/ContactList';
+
+const API_URL = 'https://address-book-api-kfpkaqtghu.now.sh';
 
 class App extends Component {
-  constructor(props)
-  {
+
+  constructor(props){
     super(props);
-    this.state = {
-      searchText:'Búsqueda',
-      nombreText:'nombre',
-      apellidosText:'apellidos',
-      telefonoText:'telefono',
+    this.state={
+        contacts: [],
+        searchText: '',
+        firstName: '',
+        lastName: '',
+        phone: ''
     };
   }
 
-  handleSearchTextChange = (event)=>
-  {
+
+  componentDidMount(){
+    this.getContacts();
+
+  }
+
+  getContacts = () => {
+    axios({
+    method: 'GET',
+    url: API_URL + '/api/contacts',
+    headers: {
+    'Api-Key':'1719069385',
+    }
+    })
+    .then((response)=>{
     this.setState({
-      searchText: event.target.value
+    contacts: response.data.data
+    });
+    console.log(this.state.contacts);
+    })
+    .catch((error)=>{
+    console.log(error);
+    })
+    }
+
+  saveContact = (contact) => {
+    axios({
+      method: 'POST',
+      url: API_URL + '/api/contacts',
+      headers:{
+        'Api-Key': '1719069385',
+        'Content-Type': 'application/json',
+
+      },
+      data:{
+        firstName: contact.firstName,
+        lastName: contact.lastName,
+        phone: contact.phone,
+      },
+    }).then((response)=>{
+      console.log(response);
+      this.getContacts();
+    }).catch((error) => {
+      console.log(error);
     });
   }
-  handleNombreChange = (event)=>
-  {
-    this.setState({
-      nombreText: event.target.value
-    });
+
+  handleSearchTextChange = (event) => {
+      this.setState({
+        searchText: event.target.value
+      });
+
   }
-  handleApellidosChange = (event)=>
-  {
-    this.setState({
-      apellidosText: event.target.value
-    });
+
+    handleFirstNameChange = (event) => {
+      this.setState({
+        firstName: event.target.value
+      });
+
   }
-  handleTelefonoChange = (event)=>
-  {
-    this.setState({
-      telefonoText: event.target.value
-    });
+
+    handleLastNameChange = (event) => {
+      this.setState({
+        lastName: event.target.value
+      });
+
   }
+
+    handlePhoneChange = (event) => {
+      this.setState({
+        phone: event.target.value
+      });
+
+  }
+
+
 
   render() {
+    const contacts = this.state.contacts.filter((contact,index) =>{
+      if(contact.firstName.indexOf(this.state.searchText) > -1){
+
+        return true;
+      }
+      return false;
+    });
+
     return (
-        <div>
-          <Header title="Kathy Alba"/>
-          <div className="container">
-            <div className="row">
-              <div className="col-sm-6">
-                <SearchBox
-                  value={this.state.searchText}
-                  onChange={this.handleSearchTextChange}
-                />
-              </div>
-              <div className="col-sm-6">
-                <h1>Nuevo Contacto</h1>
-                <ContactForm
-                  nombre={this.state.nombreText}
-                  onChangeNombre={this.handleNombreChange}
+<div>
+<Header title="Address Book"/>
+<div className="container">
+<div className="row">
+<div className="col-md-6">
+<SearchBox
+value={this.state.searchText}
+onChange={this.handleSearchTextChange}/>
+<ContactList contacts={contacts}/>
+</div>
+<div className="col-md-6">
+<h1>Nuevo contacto</h1>
+<ContactForm
+firstName={this.state.firstName}
+lastName={this.state.lastName}
+phone={this.state.phone}
+handleFirstNameChange={this.handleFirstNameChange}
+handleLastNameChange={this.handleLastNameChange}
+handlePhoneChange={this.handlePhoneChange}
+saveContact={this.saveContact}
+/>
+</div>
+</div>
+</div>
+Hola Mundo
+<Footer title="Copyright 2017 - PUCE"/>
+</div>
 
-                  apellido={this.state.apellidosText}
-                  onChangeApellidos={this.handleApellidosChange}
 
-                  telefono={this.state.telefonoText}
-                  onChangeTelefono={this.handleTelefonoChange}
-                />
-              </div>
-            </div>
-          </div>
-          <Footer CopyRight="Kathy Alba 2017"/>
-        </div>
+
     );
   }
 }
 
-export default App;// que cuando exporte el modulo el app va a recibir
+
+export default App;
